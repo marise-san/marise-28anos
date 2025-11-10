@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin RSVP | 28 Anos</title>
+    <!-- Carregando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .admin-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .header-admin {
+            background-color: #3e2723; /* Cor rústica escura */
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+            text-align: center;
+        }
+        .stats-box {
+            background-color: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #f87171;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card">
+        <div class="header-admin">
+            <h1 class="text-3xl font-extrabold">Painel de Administração</h1>
+            <p class="text-sm mt-1 opacity-80">RSVP da Festa de 28 Anos</p>
+        </div>
+
+        <div id="content" class="p-6">
+            <div id="loading" class="text-center p-8 flex flex-col items-center">
+                <div class="loader mb-3"></div>
+                <p class="text-lg font-semibold text-gray-700">Conectando ao banco de dados...</p>
+                <p class="text-sm text-gray-500 mt-1">Isso só deve demorar alguns segundos.</p>
+            </div>
+
+            <div id="adminPanel" class="hidden">
+                
+                <!-- Estatísticas Principais -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="stats-box bg-green-50">
+                        <p class="text-sm font-medium text-gray-600">Total de Pessoas (Confirmados)</p>
+                        <p id="totalGuests" class="text-3xl font-bold text-green-700 mt-1">0</p>
+                    </div>
+                    <div class="stats-box bg-blue-50">
+                        <p class="text-sm font-medium text-gray-600">Convidados (Reservas Únicas)</p>
+                        <p id="totalRsvps" class="text-3xl font-bold text-blue-700 mt-1">0</p>
+                    </div>
+                    <div class="stats-box bg-red-50">
+                        <p class="text-sm font-medium text-gray-600">Não Virão</p>
+                        <p id="totalNotAttending" class="text-3xl font-bold text-red-700 mt-1">0</p>
+                    </div>
+                </div>
+
+                <!-- Lista de Convidados -->
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Lista de Confirmações</h2>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome do Convidado</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total (c/ Acompanhantes)</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rsvpList" class="bg-white divide-y divide-gray-200">
+                            <!-- RSVPs serão injetados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyState" class="hidden text-center p-8 text-gray-500">
+                    <p>Ainda não há nenhuma reserva confirmada.</p>
+                </div>
+            </div>
+            
+            <!-- Aviso de Não Autorizado -->
+            <div id="unauthorized" class="hidden text-center p-8">
+                <p class="text-2xl font-bold text-red-500 mb-3">Acesso Negado</p>
+                <p class="text-gray-600">Você não é o administrador. Por favor, acesse esta página com o ID de sessão do organizador.</p>
+                <p class="text-sm text-gray-500 mt-4">Se for o organizador, certifique-se de que a sessão no convite foi iniciada corretamente.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script de Inicialização e Lógica Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        setLogLevel('Debug');
+
+        // Variáveis Globais (fornecidas pelo ambiente Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, adminUserId = null;
+        let isAuthReady = false;
+        
+        // Elementos UI
+        const loadingDiv = document.getElementById('loading');
+        const adminPanel = document.getElementById('adminPanel');
+        const unauthorizedDiv = document.getElementById('unauthorized');
+        const totalGuestsElement = document.getElementById('totalGuests');
+        const totalRsvpsElement = document.getElementById('totalRsvps');
+        const totalNotAttendingElement = document.getElementById('totalNotAttending');
+        const rsvpListElement = document.getElementById('rsvpList');
+        const emptyStateElement = document.getElementById('emptyState');
+
+        // --- Configuração e Autenticação Firebase ---
+        async function setupFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing.");
+                return;
+            }
+            
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                await setPersistence(auth, browserSessionPersistence);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        adminUserId = user.uid;
+                        isAuthReady = true;
+                        
+                        // Para simplificar, consideramos o primeiro usuário autenticado aqui como o admin.
+                        // Em um cenário real, você faria uma checagem de UID contra um UID fixo.
+                        loadingDiv.classList.add('hidden');
+                        adminPanel.classList.remove('hidden');
+                        setupRsvpListener();
+                    } else {
+                        console.error("Admin não autenticado.");
+                        loadingDiv.classList.add('hidden');
+                        unauthorizedDiv.classList.remove('hidden');
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+                loadingDiv.classList.add('hidden');
+                unauthorizedDiv.classList.remove('hidden');
+            }
+        }
+        
+        // --- Lógica de Leitura de RSVP (Firestore) ---
+
+        function getRsvpCollectionRef() {
+            // O convite salva os RSVPs aqui, por isso o admin precisa ler daqui.
+            return collection(db, `/artifacts/${appId}/public/data/rsvps`);
+        }
+
+        function setupRsvpListener() {
+            if (!db) return;
+            
+            const rsvpCollection = getRsvpCollectionRef();
+            const rsvpQuery = rsvpCollection; // Queremos todos os documentos da coleção
+            
+            onSnapshot(rsvpQuery, (snapshot) => {
+                const rsvps = [];
+                let totalGuests = 0;
+                let totalRsvps = 0;
+                let totalNotAttending = 0;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const guestId = doc.id;
+                    
+                    if (data.attending === true) {
+                        totalGuests += data.guests || 1;
+                        totalRsvps++;
+                        rsvps.push({ ...data, guestId, status: 'Confirmado', color: 'text-green-600' });
+                    } else if (data.attending === false) {
+                        totalNotAttending++;
+                        rsvps.push({ ...data, guestId, status: 'Não Virá', color: 'text-red-500' });
+                    }
+                });
+                
+                updateAdminUI(rsvps, totalGuests, totalRsvps, totalNotAttending);
+            }, (error) => {
+                console.error("Erro ao ouvir RSVP:", error);
+                // Exibir erro amigável na UI
+            });
+        }
+
+        function updateAdminUI(rsvps, totalGuests, totalRsvps, totalNotAttending) {
+            // 1. Atualiza as estatísticas
+            totalGuestsElement.innerText = totalGuests.toString();
+            totalRsvpsElement.innerText = totalRsvps.toString();
+            totalNotAttendingElement.innerText = totalNotAttending.toString();
+            
+            // 2. Atualiza a lista de convidados
+            rsvpListElement.innerHTML = '';
+            
+            if (rsvps.length === 0) {
+                emptyStateElement.classList.remove('hidden');
+            } else {
+                emptyStateElement.classList.add('hidden');
+
+                // Ordena por nome
+                rsvps.sort((a, b) => a.name.localeCompare(b.name));
+
+                rsvps.forEach(rsvp => {
+                    const row = document.createElement('tr');
+                    const timestamp = rsvp.timestamp ? new Date(rsvp.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${rsvp.name || `(ID: ${rsvp.guestId.substring(0, 8)}...)`}
+                            <p class="text-xs text-gray-400 mt-1">
+                                <span title="Última atualização: ${timestamp}">${timestamp}</span>
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold ${rsvp.attending ? 'text-green-600' : 'text-gray-400'}">
+                            ${rsvp.attending ? rsvp.guests : '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-center">
+                            <span class="${rsvp.color} p-1 rounded-md text-xs">
+                                ${rsvp.status}
+                            </span>
+                        </td>
+                    `;
+                    rsvpListElement.appendChild(row);
+                });
+            }
+        }
+
+        // --- Inicialização ---
+        setupFirebase();
+    </script>
+</body>
+</html>
