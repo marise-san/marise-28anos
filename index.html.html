@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>28 Anos | Fazendinha Country Bar</title>
+    <!-- Carregando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #8b5cf6;
+            --color-secondary: #dc2626;
+            --color-dark: #1f2937;
+            --color-rustic: #7a5230;
+            --color-wood-dark: #3e2723;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .invitation-card {
+            background-color: white;
+            border: 8px solid var(--color-wood-dark);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            max-width: 420px;
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .header-bg {
+            background: var(--color-wood-dark);
+            background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 8px 8px;
+            padding: 3rem 1.5rem;
+            color: white;
+            text-align: center;
+        }
+        .detail-item {
+            border-left: 4px solid var(--color-rustic);
+        }
+        .main-title {
+            font-size: 2.5rem;
+            line-height: 1;
+            font-weight: 900;
+        }
+        @media (min-width: 640px) {
+            .main-title {
+                font-size: 3rem;
+            }
+        }
+        .bbq-icon {
+            color: #fca5a5;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+        .action-button {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="invitation" class="invitation-card">
+        <div class="header-bg">
+            <!-- Icone de Churrasco (Steak) - Inline SVG -->
+            <svg class="bbq-icon mx-auto mb-4" width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM9 12C9 10.343 10.343 9 12 9C13.657 9 15 10.343 15 12C15 13.657 13.657 15 12 15C10.343 15 9 13.657 9 12ZM17 12C17 14.761 14.761 17 12 17C9.239 17 7 14.761 7 12C7 9.239 9.239 7 12 7C14.761 7 17 9.239 17 12Z" fill="currentColor" opacity="0.1"/>
+                <!-- Meat/Steak shape -->
+                <path d="M17.5 7.5C18.33 6.84 19.46 6.83 20.3 7.5C21.14 8.17 21.6 9.28 21.5 10.4C21.4 11.52 20.78 12.56 19.83 13.2C18.88 13.84 17.68 14.15 16.5 14C15.32 13.85 14.2 13.2 13.4 12.1C12.6 11 12.15 9.7 12.5 8.4C12.85 7.1 13.8 6 15 5.5C16.2 5 17.5 6 17.5 7.5Z" fill="currentColor"/>
+                <!-- Bone -->
+                <path d="M10 17C10 17.552 10.448 18 11 18H14C14.552 18 15 17.552 15 17V12.5C15 11.948 14.552 11.5 14 11.5H11C10.448 11.5 10 11.948 10 12.5V17Z" fill="#fed7aa"/>
+            </svg>
+            
+            <p class="text-lg font-medium tracking-widest uppercase mb-1">A festa é minha!</p>
+            <h1 class="main-title uppercase">28 ANOS</h1>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-6">
+            <h2 class="text-3xl font-extrabold text-gray-900 text-center -mt-8">
+                Venha Comemorar!
+            </h2>
+
+            <!-- Detalhes da Data e Hora -->
+            <div class="flex flex-col space-y-3 p-4 bg-gray-50 rounded-lg detail-item">
+                <p class="text-xs font-semibold uppercase text-gray-500">Quando</p>
+                <p class="text-xl font-bold text-gray-800">
+                    Domingo, 16 de Novembro
+                </p>
+                <p class="text-base text-gray-700 font-medium">
+                    A partir das 19h00
+                </p>
+            </div>
+
+            <!-- Detalhes do Local -->
+            <div class="space-y-3 p-4 bg-gray-50 rounded-lg detail-item">
+                <p class="text-xs font-semibold uppercase text-gray-500">Onde</p>
+                <p class="text-xl font-bold text-gray-800">
+                    Fazendinha Country Bar
+                </p>
+                <p id="address" class="text-base text-gray-700">
+                    R. Gustavo Sampaio, 2500, Bairro Parquelândia
+                </p>
+                
+                <button 
+                    onclick="copyAddress()" 
+                    class="action-button mt-4 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-colors duration-200"
+                >
+                    <!-- Icone de Pinos de Mapa - Lucide Icon (simples) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>Ver no Mapa & Copiar Endereço</span>
+                </button>
+            </div>
+
+            <!-- Mensagem de Confirmação / RSVP Button -->
+            <div class="text-center pt-2">
+                <p class="text-sm text-gray-700 font-semibold mb-2">
+                    Confirme sua presença por favor:
+                </p>
+                <button 
+                    id="rsvpButton" 
+                    onclick="openRsvpModal()" 
+                    class="action-button inline-block px-6 py-3 bg-green-600 text-white font-extrabold uppercase rounded-full tracking-wider hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-colors duration-200"
+                >
+                    <span id="rsvpButtonText">Carregando RSVP...</span>
+                </button>
+                <p class="text-xs text-gray-500 mt-3">
+                    Aguardamos você para um bom churrasco!
+                </p>
+            </div>
+            
+            <!-- Exibição do User ID (para fins de debug/localização) -->
+            <p id="userIdDisplay" class="text-xs text-center text-gray-400 mt-4"></p>
+        </div>
+
+        <!-- Pop-up de Aviso/Confirmação (Substitui o alert()) -->
+        <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                <p id="messageText" class="text-gray-800 font-semibold mb-4"></p>
+                <button onclick="closeMessage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de RSVP -->
+    <div id="rsvpModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-bold text-gray-900" id="rsvpModalTitle">Confirmação de Presença</h3>
+                <button onclick="closeRsvpModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <form id="rsvpForm" onsubmit="handleRsvp(event)">
+                <div class="mb-4">
+                    <label for="guestName" class="block text-sm font-medium text-gray-700 mb-1">Seu Nome Completo</label>
+                    <input type="text" id="guestName" name="guestName" required class="w-full p-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                </div>
+
+                <div class="mb-6">
+                    <label for="guestsCount" class="block text-sm font-medium text-gray-700 mb-1">Total de Pessoas (Incluindo Você)</label>
+                    <input type="number" id="guestsCount" name="guestsCount" min="1" required value="1" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                    <p class="text-xs text-gray-500 mt-1">Ex: Se for você e um acompanhante, digite "2".</p>
+                </div>
+
+                <div class="flex justify-between items-center space-x-4">
+                    <button type="button" onclick="handleRsvp(event, false)" class="w-full px-4 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                        Não Poderei Ir
+                    </button>
+                    <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <span id="submitText">Confirmar Presença</span>
+                        <div id="loadingIndicator" class="loader hidden"></div>
+                    </button>
+                </div>
+            </form>
+            
+            <div id="rsvpStatus" class="mt-4 p-4 rounded-lg hidden">
+                <p class="font-bold text-center" id="statusText"></p>
+                <p class="text-center text-sm mt-2">Você pode mudar sua confirmação a qualquer momento.</p>
+                <button onclick="resetRsvpForm()" class="mt-3 w-full px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                    Editar Confirmação
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script de Inicialização e Lógica Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Log Level Debug para facilitar o desenvolvimento
+        setLogLevel('Debug');
+
+        // Variáveis Globais (fornecidas pelo ambiente Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId = null;
+        let isAuthReady = false;
+        
+        const rsvpButton = document.getElementById('rsvpButton');
+        const rsvpButtonText = document.getElementById('rsvpButtonText');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const rsvpModalTitle = document.getElementById('rsvpModalTitle');
+        const rsvpForm = document.getElementById('rsvpForm');
+        const rsvpStatus = document.getElementById('rsvpStatus');
+        const statusText = document.getElementById('statusText');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const submitText = document.getElementById('submitText');
+
+
+        // --- Funções de UI (Modal) ---
+        window.openRsvpModal = function() {
+            if (!isAuthReady) {
+                showMessage("Aguarde a conexão para confirmar presença.");
+                return;
+            }
+            document.getElementById('rsvpModal').classList.remove('hidden');
+            document.getElementById('rsvpModal').classList.add('flex');
+        }
+
+        window.closeRsvpModal = function() {
+            document.getElementById('rsvpModal').classList.remove('flex');
+            document.getElementById('rsvpModal').classList.add('hidden');
+        }
+        
+        window.resetRsvpForm = function() {
+            rsvpStatus.classList.add('hidden');
+            rsvpForm.classList.remove('hidden');
+            rsvpModalTitle.innerText = "Confirmação de Presença";
+            // Limpa o formulário, mas mantém o nome preenchido se já houver
+            document.getElementById('guestsCount').value = 1; 
+        }
+
+        function toggleLoading(isLoading) {
+            loadingIndicator.classList.toggle('hidden', !isLoading);
+            submitText.classList.toggle('hidden', isLoading);
+            rsvpForm.querySelectorAll('input, button').forEach(el => el.disabled = isLoading);
+        }
+
+        // --- Funções de UI (Mensagem) ---
+        window.showMessage = function(text) {
+            document.getElementById('messageText').innerText = text;
+            document.getElementById('messageBox').classList.remove('hidden');
+            document.getElementById('messageBox').classList.add('flex');
+        }
+
+        window.closeMessage = function() {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        // --- Configuração e Autenticação Firebase ---
+        async function setupFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing.");
+                rsvpButtonText.innerText = "Erro no App";
+                return;
+            }
+            
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Define persistência para que a sessão seja mantida se o convidado recarregar
+                await setPersistence(auth, browserSessionPersistence);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        userIdDisplay.innerText = `ID da Sessão: ${userId}`;
+                        setupRsvpListener(userId);
+                    } else {
+                        console.log("Usuário deslogado ou erro de auth.");
+                        userId = null;
+                        isAuthReady = false;
+                        rsvpButtonText.innerText = "RSVP";
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+                rsvpButtonText.innerText = "Erro (Tente Recarregar)";
+            }
+        }
+        
+        // --- Lógica de RSVP (Firestore) ---
+
+        function getRsvpDocRef(uid) {
+            // Caminho para o documento de RSVP (privado, por usuário)
+            const collectionPath = `/artifacts/${appId}/users/${uid}/rsvps`;
+            return doc(db, collectionPath, 'my_rsvp');
+        }
+
+        function setupRsvpListener(uid) {
+            if (!db) return;
+            
+            const rsvpRef = getRsvpDocRef(uid);
+            
+            // Ativa o ouvinte em tempo real (onSnapshot)
+            onSnapshot(rsvpRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    updateRsvpStatusUI(data);
+                } else {
+                    updateRsvpStatusUI(null); // Sem RSVP
+                }
+            }, (error) => {
+                console.error("Erro ao ouvir RSVP:", error);
+                rsvpButtonText.innerText = "RSVP (Erro)";
+            });
+        }
+
+        function updateRsvpStatusUI(rsvpData) {
+            if (rsvpData && rsvpData.attending === true) {
+                const guests = rsvpData.guests || 1;
+                const name = rsvpData.name || "Convidado(a)";
+                
+                // Atualiza o botão principal
+                rsvpButtonText.innerText = `CONFIRMADO (${guests} Pessoas)`;
+                rsvpButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                rsvpButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                
+                // Preenche o formulário para edição
+                document.getElementById('guestName').value = name;
+                document.getElementById('guestsCount').value = guests;
+                
+                // Exibe o status
+                rsvpModalTitle.innerText = "Sua Reserva";
+                statusText.innerHTML = `Presença confirmada para **${name}** e **${guests}** pessoas no total!`;
+                rsvpStatus.classList.remove('hidden');
+                rsvpForm.classList.add('hidden');
+                
+            } else if (rsvpData && rsvpData.attending === false) {
+                // Atualiza o botão principal
+                rsvpButtonText.innerText = `NÃO VAI (Clique para editar)`;
+                rsvpButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                rsvpButton.classList.add('bg-red-600', 'hover:bg-red-700');
+
+                // Exibe o status
+                rsvpModalTitle.innerText = "Sua Reserva";
+                statusText.innerHTML = `Que pena! Você marcou **Não Poderei Ir**.`;
+                rsvpStatus.classList.remove('hidden');
+                rsvpForm.classList.add('hidden');
+
+                // Preenche o nome para edição
+                document.getElementById('guestName').value = rsvpData.name || "";
+                document.getElementById('guestsCount').value = 1;
+            
+            } else {
+                // Estado inicial
+                rsvpButtonText.innerText = "RSVP";
+                rsvpButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-600', 'hover:bg-red-700');
+                rsvpButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                rsvpStatus.classList.add('hidden');
+                rsvpForm.classList.remove('hidden');
+                rsvpModalTitle.innerText = "Confirmação de Presença";
+            }
+        }
+
+        window.handleRsvp = async function(event, attending = true) {
+            event.preventDefault();
+            
+            if (!userId || !db) {
+                showMessage("Erro de conexão. Tente recarregar a página.");
+                return;
+            }
+            
+            toggleLoading(true);
+
+            const name = document.getElementById('guestName').value.trim();
+            const guests = attending ? parseInt(document.getElementById('guestsCount').value) : 0;
+            
+            if (attending && (name === "" || guests < 1)) {
+                showMessage("Por favor, preencha seu nome e o número total de convidados.");
+                toggleLoading(false);
+                return;
+            }
+
+            try {
+                const rsvpRef = getRsvpDocRef(userId);
+                
+                const rsvpData = {
+                    name: name,
+                    attending: attending,
+                    guests: attending ? guests : 0,
+                    timestamp: new Date().toISOString()
+                };
+
+                await setDoc(rsvpRef, rsvpData, { merge: true });
+                closeRsvpModal();
+                // A UI será atualizada pelo onSnapshot
+                showMessage(`Confirmação enviada! ${attending ? 'Vemo-nos lá!' : 'Sentiremos sua falta!'}`);
+            } catch (error) {
+                console.error("Erro ao salvar RSVP:", error);
+                showMessage("Erro ao salvar a reserva. Tente novamente mais tarde.");
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        // --- Funções Auxiliares (Endereço) ---
+
+        window.copyAddress = function() {
+            const address = document.getElementById('address').innerText.trim();
+            const mapLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(address).then(() => {
+                    showMessage(`Endereço copiado! Abrindo o Google Maps...`);
+                    setTimeout(() => { window.open(mapLink, '_blank'); }, 1000);
+                }).catch(err => {
+                    console.error('Falha ao copiar usando API:', err);
+                    fallbackCopy(address, mapLink);
+                });
+            } else {
+                fallbackCopy(address, mapLink);
+            }
+        }
+        
+        function fallbackCopy(text, mapLink) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    showMessage(`Endereço copiado (método manual)! Abrindo o Google Maps...`);
+                    setTimeout(() => { window.open(mapLink, '_blank'); }, 1000);
+                } else {
+                    showMessage("Não foi possível copiar o endereço. Por favor, copie manualmente.");
+                    window.open(mapLink, '_blank');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showMessage("Erro ao copiar. Abrindo o Google Maps...");
+                window.open(mapLink, '_blank');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // --- Inicialização ---
+        setupFirebase();
+    </script>
+</body>
+</html>
