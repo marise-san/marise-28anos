@@ -116,19 +116,27 @@
     <!-- Script de Inicialização e Lógica Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        setLogLevel('Debug');
+        import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variáveis Globais (fornecidas pelo ambiente Canvas)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // =======================================================
+        // 🚨 ATENÇÃO: CONFIGURAÇÃO DE SENHA E FIREBASE 🚨
+        // =======================================================
+        const ADMIN_PASSWORD = "festa28"; // <-- MUDE ESTA SENHA!
 
-        let db, auth, adminUserId = null;
-        let isAuthReady = false;
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAcyWN28Spu3zAhNYGE9nz0VvlXL5kPBnU",
+            authDomain: "anos-c2b04.firebaseapp.com",
+            projectId: "anos-c2b04",
+            storageBucket: "anos-c2b04.firebasestorage.app",
+            messagingSenderId: "537038940891",
+            appId: "1:537038940891:web:64f8432e119403a6f5fafe",
+            measurementId: "G-L3KE1CV6PR"
+        };
+        // =======================================================
+        // FIM DA CONFIGURAÇÃO
+        // =======================================================
+
+        let db;
         
         // Elementos UI
         const loadingDiv = document.getElementById('loading');
@@ -140,62 +148,41 @@
         const rsvpListElement = document.getElementById('rsvpList');
         const emptyStateElement = document.getElementById('emptyState');
 
-        // --- Configuração e Autenticação Firebase ---
-        async function setupFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing.");
-                return;
-            }
-            
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                await setPersistence(auth, browserSessionPersistence);
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        adminUserId = user.uid;
-                        isAuthReady = true;
-                        
-                        // Para simplificar, consideramos o primeiro usuário autenticado aqui como o admin.
-                        // Em um cenário real, você faria uma checagem de UID contra um UID fixo.
-                        loadingDiv.classList.add('hidden');
-                        adminPanel.classList.remove('hidden');
-                        setupRsvpListener();
-                    } else {
-                        console.error("Admin não autenticado.");
-                        loadingDiv.classList.add('hidden');
-                        unauthorizedDiv.classList.remove('hidden');
-                    }
-                });
-
-            } catch (error) {
-                console.error("Erro ao inicializar Firebase:", error);
+        // --- Função de Autenticação Simples ---
+        function authenticate() {
+            const password = prompt("Por favor, insira a senha de administrador:");
+            if (password === ADMIN_PASSWORD) {
+                console.log("Acesso concedido.");
+                setupFirebase();
+            } else {
+                console.error("Senha incorreta.");
                 loadingDiv.classList.add('hidden');
                 unauthorizedDiv.classList.remove('hidden');
             }
         }
+
+        // --- Configuração Firebase ---
+        async function setupFirebase() {
+            try {
+                const app = initializeApp(FIREBASE_CONFIG);
+                db = getFirestore(app);
+                loadingDiv.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                setupRsvpListener();
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+                loadingDiv.classList.add('hidden');
+                unauthorizedDiv.classList.remove('hidden');
+                unauthorizedDiv.innerHTML = `<p class="text-2xl font-bold text-red-500 mb-3">Erro de Conexão</p><p>Não foi possível conectar ao Firebase. Verifique o console para mais detalhes.</p>`;
+            }
+        }
         
         // --- Lógica de Leitura de RSVP (Firestore) ---
-
-        function getRsvpCollectionRef() {
-            // O convite salva os RSVPs aqui, por isso o admin precisa ler daqui.
-            return collection(db, `/artifacts/${appId}/public/data/rsvps`);
-        }
-
         function setupRsvpListener() {
             if (!db) return;
             
-            const rsvpCollection = getRsvpCollectionRef();
-            const rsvpQuery = rsvpCollection; // Queremos todos os documentos da coleção
+            const rsvpCollection = collection(db, "confirmados");
+            const rsvpQuery = query(rsvpCollection);
             
             onSnapshot(rsvpQuery, (snapshot) => {
                 const rsvps = [];
@@ -219,18 +206,16 @@
                 
                 updateAdminUI(rsvps, totalGuests, totalRsvps, totalNotAttending);
             }, (error) => {
-                console.error("Erro ao ouvir RSVP:", error);
-                // Exibir erro amigável na UI
+                console.error("Erro ao carregar lista de convidados:", error);
+                alert("Não foi possível carregar a lista de convidados. Verifique o console de erros.");
             });
         }
 
         function updateAdminUI(rsvps, totalGuests, totalRsvps, totalNotAttending) {
-            // 1. Atualiza as estatísticas
             totalGuestsElement.innerText = totalGuests.toString();
             totalRsvpsElement.innerText = totalRsvps.toString();
             totalNotAttendingElement.innerText = totalNotAttending.toString();
             
-            // 2. Atualiza a lista de convidados
             rsvpListElement.innerHTML = '';
             
             if (rsvps.length === 0) {
@@ -238,16 +223,15 @@
             } else {
                 emptyStateElement.classList.add('hidden');
 
-                // Ordena por nome
-                rsvps.sort((a, b) => a.name.localeCompare(b.name));
+                rsvps.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
                 rsvps.forEach(rsvp => {
                     const row = document.createElement('tr');
-                    const timestamp = rsvp.timestamp ? new Date(rsvp.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                    const timestamp = rsvp.timestamp ? new Date(rsvp.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'N/A';
                     
                     row.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            ${rsvp.name || `(ID: ${rsvp.guestId.substring(0, 8)}...)`}
+                            ${rsvp.name || `(Nome não preenchido)`}
                             <p class="text-xs text-gray-400 mt-1">
                                 <span title="Última atualização: ${timestamp}">${timestamp}</span>
                             </p>
@@ -266,7 +250,8 @@
             }
         }
 
-        setupFirebase();
+        // Inicia o processo de autenticação ao carregar a página
+        authenticate();
     </script>
 </body>
 </html>

@@ -221,42 +221,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Log Level Debug para facilitar o desenvolvimento
         setLogLevel('Debug');
-
-        // Variáveis Globais de Ambiente
-        const __app_id = typeof window.__app_id !== 'undefined' ? window.__app_id : null;
-        const __firebase_config = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : null;
-        
-        let FIREBASE_APP_ID;
-        let FIREBASE_CONFIG;
-
-        // =======================================================
-        // 🚨 ATENÇÃO: CONFIGURAÇÃO PARA DEPLOY NO GITHUB PAGES 🚨
-        // =======================================================
-        
-        if (__app_id && __firebase_config) {
-            FIREBASE_APP_ID = __app_id;
-            FIREBASE_CONFIG = JSON.parse(__firebase_config);
-        } else {
-            FIREBASE_APP_ID = "anos-c2b04"; 
-            FIREBASE_CONFIG = {
-                apiKey: "AIzaSyAcyWN28Spu3zAhNYGE9nz0VvlXL5kPBnU",
-                authDomain: "anos-c2b04.firebaseapp.com",
-                projectId: "anos-c2b04",
-                storageBucket: "anos-c2b04.firebasestorage.app",
-                messagingSenderId: "537038940891",
-                appId: "1:537038940891:web:64f8432e119403a6f5fafe",
-                measurementId: "G-L3KE1CV6PR"
-            };
-        }
-        
-        // =======================================================
-        // FIM DA CONFIGURAÇÃO DE AMBIENTE
-        // =======================================================
 
         let db, auth, userId = null;
         let isAuthReady = false;
@@ -314,15 +282,17 @@
         }
 
         // --- Configuração e Autenticação Firebase ---
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAcyWN28Spu3zAhNYGE9nz0VvlXL5kPBnU",
+            authDomain: "anos-c2b04.firebaseapp.com",
+            projectId: "anos-c2b04",
+            storageBucket: "anos-c2b04.firebasestorage.app",
+            messagingSenderId: "537038940891",
+            appId: "1:537038940891:web:64f8432e119403a6f5fafe",
+            measurementId: "G-L3KE1CV6PR"
+        };
+
         async function setupFirebase() {
-            // Se estiver rodando no GitHub Pages e o usuário não configurou as chaves.
-            if (!__app_id && FIREBASE_CONFIG.projectId === "SEU_PROJECT_ID_AQUI") {
-                console.error("ERRO: Configure as credenciais do Firebase manualmente.");
-                rsvpButtonText.innerText = "ERRO: Faltam Credenciais";
-                showMessage("ATENÇÃO: Para usar no GitHub Pages, você precisa inserir suas credenciais do Firebase no código.");
-                return;
-            }
-            
             try {
                 const app = initializeApp(FIREBASE_CONFIG);
                 auth = getAuth(app);
@@ -351,16 +321,22 @@
 
             } catch (error) {
                 console.error("Erro ao inicializar Firebase:", error);
-                rsvpButtonText.innerText = "Erro (Tente Recarregar)";
+                rsvpButtonText.innerText = "Erro de Conexão";
+                let friendlyMessage = "Ocorreu um erro ao conectar com o servidor de confirmação. Tente recarregar a página.";
+                if (error.code === 'auth/operation-not-allowed') {
+                    friendlyMessage = "A autenticação anônima não está ativada no Firebase. Por favor, ative-a no seu painel Firebase (Authentication -> Sign-in method).";
+                } else if (error.code) {
+                    friendlyMessage += ` (Código: ${error.code})`;
+                }
+                showMessage(friendlyMessage);
             }
         }
         
         // --- Lógica de RSVP (Firestore) ---
 
         function getRsvpDocRef(uid) {
-            // Usa o ID configurado e o caminho público para a coleção 'rsvps'.
-            const collectionPath = `/artifacts/${FIREBASE_APP_ID}/public/data/rsvps`;
-            return doc(db, collectionPath, uid); // Usa o UID do convidado como ID do documento
+            // O documento de confirmação de cada pessoa fica na coleção 'confirmados', usando o ID de usuário anônimo como chave.
+            return doc(db, "confirmados", uid);
         }
 
         function setupRsvpListener(uid) {
