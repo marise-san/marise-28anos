@@ -154,7 +154,7 @@
                     <span id="rsvpButtonText">Carregando RSVP...</span>
                 </button>
                 <p class="text-xs text-gray-500 mt-3">
-                    Aguardamos você para um bom churrasco!
+                    Aguardamos você para um bom churrasco e muita cerveja!
                 </p>
             </div>
             
@@ -220,17 +220,43 @@
     <!-- Script de Inicialização e Lógica Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Log Level Debug para facilitar o desenvolvimento
         setLogLevel('Debug');
 
-        // Variáveis Globais (fornecidas pelo ambiente Canvas)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Variáveis Globais de Ambiente
+        const __app_id = typeof window.__app_id !== 'undefined' ? window.__app_id : null;
+        const __firebase_config = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : null;
+        
+        let FIREBASE_APP_ID;
+        let FIREBASE_CONFIG;
+
+        // =======================================================
+        // 🚨 ATENÇÃO: CONFIGURAÇÃO PARA DEPLOY NO GITHUB PAGES 🚨
+        // =======================================================
+        
+        if (__app_id && __firebase_config) {
+            FIREBASE_APP_ID = __app_id;
+            FIREBASE_CONFIG = JSON.parse(__firebase_config);
+        } else {
+            FIREBASE_APP_ID = "anos-c2b04"; 
+            FIREBASE_CONFIG = {
+                apiKey: "AIzaSyAcyWN28Spu3zAhNYGE9nz0VvlXL5kPBnU",
+                authDomain: "anos-c2b04.firebaseapp.com",
+                projectId: "anos-c2b04",
+                storageBucket: "anos-c2b04.firebasestorage.app",
+                messagingSenderId: "537038940891",
+                appId: "1:537038940891:web:64f8432e119403a6f5fafe",
+                measurementId: "G-L3KE1CV6PR"
+            };
+        }
+        
+        // =======================================================
+        // FIM DA CONFIGURAÇÃO DE AMBIENTE
+        // =======================================================
 
         let db, auth, userId = null;
         let isAuthReady = false;
@@ -289,31 +315,31 @@
 
         // --- Configuração e Autenticação Firebase ---
         async function setupFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing.");
-                rsvpButtonText.innerText = "Erro no App";
+            // Se estiver rodando no GitHub Pages e o usuário não configurou as chaves.
+            if (!__app_id && FIREBASE_CONFIG.projectId === "SEU_PROJECT_ID_AQUI") {
+                console.error("ERRO: Configure as credenciais do Firebase manualmente.");
+                rsvpButtonText.innerText = "ERRO: Faltam Credenciais";
+                showMessage("ATENÇÃO: Para usar no GitHub Pages, você precisa inserir suas credenciais do Firebase no código.");
                 return;
             }
             
             try {
-                const app = initializeApp(firebaseConfig);
+                const app = initializeApp(FIREBASE_CONFIG);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Define persistência para que a sessão seja mantida se o convidado recarregar
+                // Define persistência
                 await setPersistence(auth, browserSessionPersistence);
 
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Autenticação anônima, pois não exigimos login.
+                await signInAnonymously(auth);
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
                         isAuthReady = true;
-                        userIdDisplay.innerText = `ID da Sessão: ${userId}`;
+                        // Exibe o ID da sessão (importante para o Admin se identificar)
+                        userIdDisplay.innerText = `ID da Sessão: ${userId}`; 
                         setupRsvpListener(userId);
                     } else {
                         console.log("Usuário deslogado ou erro de auth.");
@@ -332,9 +358,9 @@
         // --- Lógica de RSVP (Firestore) ---
 
         function getRsvpDocRef(uid) {
-            // Caminho para o documento de RSVP (privado, por usuário)
-            const collectionPath = `/artifacts/${appId}/users/${uid}/rsvps`;
-            return doc(db, collectionPath, 'my_rsvp');
+            // Usa o ID configurado e o caminho público para a coleção 'rsvps'.
+            const collectionPath = `/artifacts/${FIREBASE_APP_ID}/public/data/rsvps`;
+            return doc(db, collectionPath, uid); // Usa o UID do convidado como ID do documento
         }
 
         function setupRsvpListener(uid) {
